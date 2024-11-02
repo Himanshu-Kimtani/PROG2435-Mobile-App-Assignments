@@ -24,24 +24,23 @@ class TripPlannerForm extends StatefulWidget {
 
 class _TripPlannerFormState extends State<TripPlannerForm> {
   int customerType = -1;
-  int destination = -1;
+  String destination = "";
   String contactPhone = "";
   String emailAddress = "";
   double tripPrice = 0;
   String additionalInfo = "";
-  String tripsListMessage = "";
+  String infoMessage = "";
   TripManager manager = TripManager();
 
   final form = FormGroup({
     'type': FormControl<int>(validators: [Validators.required]),
-    'destination': FormControl<int>(validators: [
+    'destination': FormControl<String>(validators: [
       Validators.required,
     ]),
     'contact': FormControl<String>(validators: [
       Validators.required,
-      Validators.pattern(RegExp(r"\d{10}")),
-      Validators.minLength(10),
-      Validators.maxLength(10),
+      Validators.pattern(RegExp(
+          r"^(\+?\d{0,2})?\s?[\D]?\(?(\d{3})\)?[\D]?(\d{3})[\D]?(\d{4})$")),
     ]),
     'email': FormControl<String>(validators: [
       Validators.required,
@@ -52,56 +51,74 @@ class _TripPlannerFormState extends State<TripPlannerForm> {
       Validators.min(0.0),
       Validators.max(1000.0)
     ]),
-    'additionalInfo': FormControl<double>(validators: [Validators.required])
+    'additionalInfo': FormControl<String>(validators: [Validators.required])
   });
 
   bookTrip() {
-    if (form.valid) {
+    Trip trip;
+
+    if (!form.valid) {
+      setState(() {
+        infoMessage = "Form not valid!";
+      });
+    } else {
       customerType = form.control('type').value;
       destination = form.control('destination').value;
       contactPhone = form.control('contact').value ?? "";
       emailAddress = form.control('email').value ?? "";
       tripPrice = form.control('price').value ?? 0;
       additionalInfo = form.control('additionalInfo').value ?? "";
-    }
 
-    switch (CustomerType.values[customerType]) {
-      case CustomerType.individual:
-        IndividualTrip trip = IndividualTrip(
-            destination: Destinations.values[destination],
-            contactPhone: contactPhone,
-            email: emailAddress,
-            price: tripPrice,
-            homeAddress: additionalInfo);
-        manager.addTrip(trip);
-        break;
-      case CustomerType.family:
-        FamilyTrip trip = FamilyTrip(
-            destination: Destinations.values[destination],
-            contactPhone: contactPhone,
-            email: emailAddress,
-            price: tripPrice,
-            primaryContact: additionalInfo);
-        manager.addTrip(trip);
+      switch (CustomerType.values[customerType]) {
+        case CustomerType.individual:
+          trip = IndividualTrip(
+              destination: destination,
+              contactPhone: contactPhone,
+              email: emailAddress,
+              price: tripPrice,
+              homeAddress: additionalInfo);
+          manager.addTrip(trip);
+          break;
+        case CustomerType.family:
+          trip = FamilyTrip(
+              destination: destination,
+              contactPhone: contactPhone,
+              email: emailAddress,
+              price: tripPrice,
+              primaryContact: additionalInfo);
+          manager.addTrip(trip);
 
-        break;
-      case CustomerType.group:
-        GroupTrip trip = GroupTrip(
-            destination: Destinations.values[destination],
-            contactPhone: contactPhone,
-            email: emailAddress,
-            price: tripPrice,
-            groupInsuranceNumber: additionalInfo);
-        manager.addTrip(trip);
-        break;
-      default:
-        break;
+          break;
+        case CustomerType.group:
+          trip = GroupTrip(
+              destination: destination,
+              contactPhone: contactPhone,
+              email: emailAddress,
+              price: tripPrice,
+              groupInsuranceNumber: additionalInfo);
+          manager.addTrip(trip);
+          break;
+        default:
+          trip = Trip(
+              destination: destination,
+              contactPhone: contactPhone,
+              email: emailAddress,
+              price: tripPrice);
+          break;
+      }
+      setState(() {
+        infoMessage = "Trip Booked: \n";
+        infoMessage += trip.toString();
+        form.reset();
+      });
     }
   }
 
   showTrips() {
-    String allTrips = manager.showAllTrips();
-    
+    setState(() {
+      infoMessage = "All Trips: \n";
+      infoMessage += manager.showAllTrips();
+    });
   }
 
   @override
@@ -140,18 +157,18 @@ class _TripPlannerFormState extends State<TripPlannerForm> {
                     key: const Key('TripDestination'),
                     formControlName: 'destination',
                     hint: const Text("Please select your destination"),
-                    items: [
+                    items: const [
                       DropdownMenuItem(
-                        value: Destinations.blueMountain.index,
-                        child: const Text("Blue Mountain"),
+                        value: "Blue Mountain",
+                        child: Text("Blue Mountain"),
                       ),
                       DropdownMenuItem(
-                        value: Destinations.niagaraFalls.index,
-                        child: const Text("Niagara Falls"),
+                        value: "Niagara Falls",
+                        child: Text("Niagara Falls"),
                       ),
                       DropdownMenuItem(
-                        value: Destinations.banffNationalPark.index,
-                        child: const Text("Banff National Park"),
+                        value: "Banff National Park",
+                        child: Text("Banff National Park"),
                       ),
                     ]),
                 const SizedBox(height: 8),
@@ -163,7 +180,7 @@ class _TripPlannerFormState extends State<TripPlannerForm> {
                   ),
                   textAlign: TextAlign.start,
                   style: const TextStyle(backgroundColor: Colors.white),
-                  keyboardType: TextInputType.text,
+                  keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 8),
                 ReactiveTextField(
@@ -173,7 +190,7 @@ class _TripPlannerFormState extends State<TripPlannerForm> {
                         const InputDecoration(labelText: "Email Address"),
                     textAlign: TextAlign.start,
                     style: const TextStyle(backgroundColor: Colors.white),
-                    keyboardType: TextInputType.text),
+                    keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: 8),
                 ReactiveTextField(
                     key: const Key("TripPrice"),
@@ -203,7 +220,7 @@ class _TripPlannerFormState extends State<TripPlannerForm> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(tripsListMessage),
+                Text(infoMessage),
               ],
             ),
           ),

@@ -6,7 +6,7 @@ enum CustomerType { individual, family, group }
 
 /// Base Trip class
 class Trip {
-  final Destinations destination;
+  final String destination;
   final String contactPhone;
   final String email;
   final double price;
@@ -21,7 +21,7 @@ class Trip {
   // Base toString for common properties
   @override
   String toString() =>
-      'Destination: ${destination.name}, Contact Phone: $contactPhone, Email: $email, Price: \$${price.toStringAsFixed(2)}';
+      'Destination: $destination \nContact Phone: $contactPhone \nEmail: $email \nPrice: \$${price.toStringAsFixed(2)}';
 }
 
 /// IndividualTrip class with specific property: homeAddress
@@ -38,7 +38,7 @@ class IndividualTrip extends Trip {
 
   @override
   String toString() {
-    return '${super.toString()}, Home Address: $homeAddress';
+    return '${super.toString()} \nHome Address: $homeAddress';
   }
 }
 
@@ -56,7 +56,7 @@ class FamilyTrip extends Trip {
 
   @override
   String toString() {
-    return '${super.toString()}, Primary Contact: $primaryContact';
+    return '${super.toString()} \nPrimary Contact: $primaryContact';
   }
 }
 
@@ -74,7 +74,7 @@ class GroupTrip extends Trip {
 
   @override
   String toString() {
-    return '${super.toString()}, Group Insurance Number: $groupInsuranceNumber';
+    return '${super.toString()} \nGroup Insurance Number: $groupInsuranceNumber';
   }
 }
 
