@@ -29,10 +29,10 @@ class DatabaseHelper {
       CREATE TABLE trips (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         customerName TEXT NOT NULL,
+        customerType TEXT NOT NULL,
         destination TEXT NOT NULL,
-        price REAL NOT NULL,
-        additionalInfo TEXT,
-        customerType INTEGER
+        tripPrice REAL NOT NULL,
+        customerTypeDetail TEXT NOT NULL
       )
     ''');
   }
@@ -52,15 +52,6 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<Trip>> fetchTrips() async {
-    final db = await database;
-    final maps = await db.query('trips');
-
-    return List.generate(maps.length, (i) {
-      return Trip.fromMap(maps[i]);
-    });
-  }
-
   Future<void> deleteTrip(int id) async {
     final db = await database;
     await db.delete(
@@ -68,5 +59,14 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<List<Trip>> fetchTrips() async {
+    final db = await database;
+    final maps = await db.query('trips');
+
+    return List.generate(maps.length, (i) {
+      return Trip.fromMap(maps[i]);
+    });
   }
 }

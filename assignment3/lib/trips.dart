@@ -1,39 +1,40 @@
 class Trip {
   final int? id;
   final String customerName;
+  final String customerType;
   final String destination;
-  final double price;
-  final String additionalInfo;
-  final int customerType;
+  final double tripPrice;
+  final String
+      customerTypeDetail; // Replace additionalInfo with customerTypeDetail
 
   Trip({
     this.id,
     required this.customerName,
+    required this.customerType,
     required this.destination,
-    required this.price,
-    this.additionalInfo = '',
-    this.customerType = -1,
+    required this.tripPrice,
+    required this.customerTypeDetail,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'customerName': customerName,
-      'destination': destination,
-      'price': price,
-      'additionalInfo': additionalInfo,
       'customerType': customerType,
+      'destination': destination,
+      'tripPrice': tripPrice,
+      'customerTypeDetail': customerTypeDetail,
     };
   }
 
   static Trip fromMap(Map<String, dynamic> map) {
     return Trip(
       id: map['id'],
-      customerName: map['customerName'] ?? '',
+      customerName: map['customerName'],
+      customerType: map['customerType'],
       destination: map['destination'],
-      price: map['price'],
-      additionalInfo: map['additionalInfo'] ?? '',
-      customerType: map['customerType'] ?? -1,
+      tripPrice: map['tripPrice'],
+      customerTypeDetail: map['customerTypeDetail'],
     );
   }
 }

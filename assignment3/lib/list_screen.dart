@@ -29,21 +29,6 @@ class _TripListScreenState extends State<TripListScreen> {
     _loadTrips();
   }
 
-  void _navigateToAddOrEditTrip(Trip? trip) async {
-    // Navigate to TripDetailScreen and wait for the result
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TripDetailScreen(trip: trip),
-      ),
-    );
-
-    // If the result is true, refresh the trip list
-    if (result == true) {
-      _loadTrips();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,26 +37,51 @@ class _TripListScreenState extends State<TripListScreen> {
       ),
       body: trips.isEmpty
           ? Center(child: Text('No trips booked yet.'))
-          : ListView.builder(
-              itemCount: trips.length,
-              itemBuilder: (context, index) {
-                final trip = trips[index];
-                return ListTile(
-                  title: Text('${trip.customerName} - ${trip.destination}'),
-                  subtitle: Text('Price: \$${trip.price.toStringAsFixed(2)}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => _deleteTrip(trip.id!),
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Total Trips: ${trips.length}',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  onTap: () {
-                    _navigateToAddOrEditTrip(trip); // Navigate to edit trip
-                  },
-                );
-              },
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: trips.length,
+                    itemBuilder: (context, index) {
+                      final trip = trips[index];
+                      return ListTile(
+                        title:
+                            Text('${trip.customerName} - ${trip.customerType}'),
+                        subtitle: Text(
+                          'Destination: ${trip.destination}, Price: \$${trip.tripPrice.toStringAsFixed(2)}\nDetails: ${trip.customerTypeDetail}',
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () => _deleteTrip(trip.id!),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TripDetailScreen(trip: trip),
+                            ),
+                          ).then((_) => _loadTrips());
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _navigateToAddOrEditTrip(null); // Navigate to add a new trip
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TripDetailScreen()),
+          ).then((_) => _loadTrips());
         },
         child: Icon(Icons.add),
         tooltip: 'Add New Trip',
