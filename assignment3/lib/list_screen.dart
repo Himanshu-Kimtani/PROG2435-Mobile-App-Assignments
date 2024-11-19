@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart'; 
+import 'database_helper.dart';
+import 'details_screen.dart';
 import 'trips.dart';
-import 'details_screen.dart'; 
 
 class TripListScreen extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _TripListScreenState extends State<TripListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTrips(); // Load trips from the database when screen loads
+    _loadTrips();
   }
 
   Future<void> _loadTrips() async {
@@ -26,7 +26,22 @@ class _TripListScreenState extends State<TripListScreen> {
 
   void _deleteTrip(int id) async {
     await DatabaseHelper.instance.deleteTrip(id);
-    _loadTrips(); // Refresh the list after deletion
+    _loadTrips();
+  }
+
+  void _navigateToAddOrEditTrip(Trip? trip) async {
+    // Navigate to TripDetailScreen and wait for the result
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripDetailScreen(trip: trip),
+      ),
+    );
+
+    // If the result is true, refresh the trip list
+    if (result == true) {
+      _loadTrips();
+    }
   }
 
   @override
@@ -42,24 +57,21 @@ class _TripListScreenState extends State<TripListScreen> {
               itemBuilder: (context, index) {
                 final trip = trips[index];
                 return ListTile(
-                  title: Text(trip.destination),
+                  title: Text('${trip.customerName} - ${trip.destination}'),
                   subtitle: Text('Price: \$${trip.price.toStringAsFixed(2)}'),
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () => _deleteTrip(trip.id!),
                   ),
                   onTap: () {
-                    // Additional functionality could go here, like viewing details
+                    _navigateToAddOrEditTrip(trip); // Navigate to edit trip
                   },
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => TripPlannerForm()),
-          ).then((_) => _loadTrips()); // Reload trips after returning
+          _navigateToAddOrEditTrip(null); // Navigate to add a new trip
         },
         child: Icon(Icons.add),
         tooltip: 'Add New Trip',

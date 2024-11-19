@@ -1,228 +1,216 @@
 import 'package:flutter/material.dart';
-import 'package:reactive_forms/reactive_forms.dart';
+import 'database_helper.dart';
 import 'trips.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+class TripDetailScreen extends StatefulWidget {
+  final Trip? trip;
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  TripDetailScreen({this.trip});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: TripPlannerForm());
+  _TripDetailScreenState createState() => _TripDetailScreenState();
+}
+
+class _TripDetailScreenState extends State<TripDetailScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late String _customerName;
+  late String _destination;
+  late double _price;
+  late String _additionalInfo;
+  int _customerType = -1;
+
+  Map<String, String> packageMapping = {
+    "1": "Blue Mountain",
+    "2": "Niagara Falls",
+    "3": "Banff National Park"
+  };
+
+  Map<String, Map<String, double>> packages = {
+    "Individual": {
+      "Blue Mountain": 200.0,
+      "Niagara Falls": 100.0,
+      "Banff National Park": 300.0,
+    },
+    "Family": {
+      "Blue Mountain": 400.0,
+      "Niagara Falls": 300.0,
+      "Banff National Park": 700.0,
+    },
+    "Group": {
+      "Blue Mountain": 700.0,
+      "Niagara Falls": 1000.0,
+      "Banff National Park": 1300.0,
+    }
+  };
+
+  List<String> customerTypes = ['Individual', 'Family', 'Group'];
+
+  @override
+  void initState() {
+    super.initState();
+    _customerName = widget.trip?.customerName ?? '';
+    _destination = widget.trip?.destination ?? '';
+    _price = widget.trip?.price ?? 0.0;
+    _additionalInfo = widget.trip?.additionalInfo ?? '';
+    _customerType = widget.trip?.customerType ?? -1;
   }
-}
 
-class TripPlannerForm extends StatefulWidget {
-  const TripPlannerForm({super.key});
-
-  @override
-  State<TripPlannerForm> createState() => _TripPlannerFormState();
-}
-
-class _TripPlannerFormState extends State<TripPlannerForm> {
-  int customerType = -1;
-  String destination = "";
-  String contactPhone = "";
-  String emailAddress = "";
-  double tripPrice = 0;
-  String additionalInfo = "";
-  String infoMessage = "";
-  TripManager manager = TripManager();
-
-  final form = FormGroup({
-    'type': FormControl<int>(validators: [Validators.required]),
-    'destination': FormControl<String>(validators: [
-      Validators.required,
-    ]),
-    'contact': FormControl<String>(validators: [
-      Validators.required,
-      Validators.pattern(RegExp(
-          r"^(\+?\d{0,2})?\s?[\D]?\(?(\d{3})\)?[\D]?(\d{3})[\D]?(\d{4})$")),
-    ]),
-    'email': FormControl<String>(validators: [
-      Validators.required,
-      Validators.email,
-    ]),
-    'price': FormControl<double>(validators: [
-      Validators.required,
-      Validators.min(0.0),
-      Validators.max(1000.0)
-    ]),
-    'additionalInfo': FormControl<String>(validators: [Validators.required])
-  });
-
-  bookTrip() {
-    Trip trip;
-
-    if (!form.valid) {
+  void _updatePrice() {
+    if (_customerType != -1 && _destination.isNotEmpty) {
+      String customerKey = customerTypes[_customerType];
       setState(() {
-        infoMessage = "Form not valid!";
+        _price = packages[customerKey]?[_destination] ?? 0.0;
+        print('Customer Type: $customerKey'); // Debugging print statement
+        print('Destination: $_destination'); // Debugging print statement
+        print('Updated Price: $_price'); // Debugging print statement
       });
     } else {
-      customerType = form.control('type').value;
-      destination = form.control('destination').value;
-      contactPhone = form.control('contact').value ?? "";
-      emailAddress = form.control('email').value ?? "";
-      tripPrice = form.control('price').value ?? 0;
-      additionalInfo = form.control('additionalInfo').value ?? "";
-
-      switch (CustomerType.values[customerType]) {
-        case CustomerType.individual:
-          trip = IndividualTrip(
-              destination: destination,
-              contactPhone: contactPhone,
-              email: emailAddress,
-              price: tripPrice,
-              homeAddress: additionalInfo);
-          manager.addTrip(trip);
-          break;
-        case CustomerType.family:
-          trip = FamilyTrip(
-              destination: destination,
-              contactPhone: contactPhone,
-              email: emailAddress,
-              price: tripPrice,
-              primaryContact: additionalInfo);
-          manager.addTrip(trip);
-
-          break;
-        case CustomerType.group:
-          trip = GroupTrip(
-              destination: destination,
-              contactPhone: contactPhone,
-              email: emailAddress,
-              price: tripPrice,
-              groupInsuranceNumber: additionalInfo);
-          manager.addTrip(trip);
-          break;
-        default:
-          trip = Trip(
-              destination: destination,
-              contactPhone: contactPhone,
-              email: emailAddress,
-              price: tripPrice);
-          break;
-      }
       setState(() {
-        infoMessage = "Trip Booked: \n";
-        infoMessage += trip.toString();
-        form.reset();
+        _price = 0.0;
       });
     }
   }
 
-  showTrips() {
-    setState(() {
-      infoMessage = "All Trips: \n";
-      infoMessage += manager.showAllTrips();
-    });
+  void _saveTrip() async {
+    print('Save button pressed');
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      print('Form validated. Saving trip...');
+
+      final trip = Trip(
+        id: widget.trip?.id,
+        customerName: _customerName,
+        destination: _destination,
+        price: _price,
+        additionalInfo: _additionalInfo,
+        customerType: _customerType,
+      );
+
+      if (widget.trip == null) {
+        print('Inserting new trip: ${trip.customerName}, ${trip.destination}');
+        await DatabaseHelper.instance.insertTrip(trip);
+        print('New trip inserted');
+      } else {
+        print(
+            'Updating existing trip: ${trip.customerName}, ${trip.destination}');
+        await DatabaseHelper.instance.updateTrip(trip);
+        print('Trip updated');
+      }
+
+      Navigator.pop(context, true); // Navigate back with a success result
+    } else {
+      print('Form validation failed');
+    }
+  }
+
+  Widget _buildCustomerTypeDropdown() {
+    return DropdownButtonFormField<int>(
+      decoration: InputDecoration(labelText: 'Customer Type'),
+      value: _customerType == -1 ? null : _customerType,
+      items: [
+        DropdownMenuItem(value: 0, child: Text('Individual')),
+        DropdownMenuItem(value: 1, child: Text('Family')),
+        DropdownMenuItem(value: 2, child: Text('Group')),
+      ],
+      onChanged: (value) {
+        setState(() {
+          _customerType = value!;
+          _updatePrice(); // Call to update the price
+        });
+      },
+      validator: (value) {
+        if (value == null || value == -1) {
+          return 'Please select a customer type';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDestinationDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(labelText: 'Select Destination'),
+      value: _destination.isEmpty ? null : _destination,
+      items: packageMapping.entries
+          .map((entry) => DropdownMenuItem<String>(
+                value: entry.value,
+                child: Text(entry.value),
+              ))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          _destination = value!;
+          _updatePrice(); // Call to update the price
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select a destination';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPriceDisplay() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Text(
+        'Price: \$${_price.toStringAsFixed(2)}',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Trip Planner Form"),
+        title: Text(widget.trip == null ? 'Add Trip' : 'Edit Trip'),
       ),
-      body: ReactiveForm(
-        formGroup: form,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                ReactiveDropdownField(
-                    key: const Key('CustomerType'),
-                    formControlName: 'type',
-                    hint: const Text("Please select customer type"),
-                    items: [
-                      DropdownMenuItem(
-                        value: CustomerType.individual.index,
-                        child: const Text("Individual"),
-                      ),
-                      DropdownMenuItem(
-                        value: CustomerType.family.index,
-                        child: const Text("Family"),
-                      ),
-                      DropdownMenuItem(
-                        value: CustomerType.group.index,
-                        child: const Text("Group"),
-                      ),
-                    ]),
-                const SizedBox(height: 8),
-                ReactiveDropdownField(
-                    key: const Key('TripDestination'),
-                    formControlName: 'destination',
-                    hint: const Text("Please select your destination"),
-                    items: const [
-                      DropdownMenuItem(
-                        value: "Blue Mountain",
-                        child: Text("Blue Mountain"),
-                      ),
-                      DropdownMenuItem(
-                        value: "Niagara Falls",
-                        child: Text("Niagara Falls"),
-                      ),
-                      DropdownMenuItem(
-                        value: "Banff National Park",
-                        child: Text("Banff National Park"),
-                      ),
-                    ]),
-                const SizedBox(height: 8),
-                ReactiveTextField(
-                  key: const Key("ContactPhone"),
-                  formControlName: "contact",
-                  decoration: const InputDecoration(
-                    labelText: "Contact Phone",
-                  ),
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(backgroundColor: Colors.white),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 8),
-                ReactiveTextField(
-                    key: const Key("EmailAddress"),
-                    formControlName: "email",
-                    decoration:
-                        const InputDecoration(labelText: "Email Address"),
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(backgroundColor: Colors.white),
-                    keyboardType: TextInputType.emailAddress),
-                const SizedBox(height: 8),
-                ReactiveTextField(
-                    key: const Key("TripPrice"),
-                    formControlName: "price",
-                    decoration: const InputDecoration(labelText: "Trip Price"),
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(backgroundColor: Colors.white),
-                    keyboardType: TextInputType.number),
-                const SizedBox(height: 8),
-                ReactiveTextField(
-                    key: const Key("AdditionalInfo"),
-                    formControlName: "additionalInfo",
-                    decoration: const InputDecoration(
-                        labelText: "Additional Information"),
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(backgroundColor: Colors.white),
-                    keyboardType: TextInputType.text),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FilledButton(
-                        onPressed: bookTrip, child: const Text("Book Trip")),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                        onPressed: showTrips, child: const Text("See Trips"))
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(infoMessage),
-              ],
-            ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                initialValue: _customerName,
+                decoration: InputDecoration(labelText: 'Customer Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a customer name';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  _customerName = value;
+                },
+              ),
+              SizedBox(height: 16),
+              _buildCustomerTypeDropdown(),
+              SizedBox(height: 16),
+              _buildDestinationDropdown(),
+              SizedBox(height: 16),
+              _buildPriceDisplay(),
+              TextFormField(
+                initialValue: _additionalInfo,
+                decoration:
+                    InputDecoration(labelText: 'Additional Information'),
+                onChanged: (value) {
+                  _additionalInfo = value;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _saveTrip(); // Call the _saveTrip() method when Save is pressed
+                  }
+                },
+                child: Text('Save'),
+              ),
+            ],
           ),
         ),
       ),

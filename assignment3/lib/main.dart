@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'list_screen.dart'; // Import the list screen
+import 'list_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +12,6 @@ class MyApp extends StatelessWidget {
       title: 'Tourist Agency App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.blueAccent,
@@ -26,8 +25,8 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.blueAccent,
         ),
       ),
-      home: TripListScreen(), // The home screen for the app
-      debugShowCheckedModeBanner: false, // Removes debug banner
+      home: TripListScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
