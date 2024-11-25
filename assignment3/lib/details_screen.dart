@@ -5,7 +5,7 @@ import 'trips.dart';
 class TripDetailScreen extends StatefulWidget {
   final Trip? trip;
 
-  TripDetailScreen({this.trip});
+  const TripDetailScreen({super.key, this.trip});
 
   @override
   _TripDetailScreenState createState() => _TripDetailScreenState();
@@ -66,7 +66,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             children: [
               TextFormField(
                 initialValue: _customerName,
-                decoration: InputDecoration(labelText: 'Customer Name'),
+                decoration: const InputDecoration(labelText: 'Customer Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a customer name';
@@ -79,7 +79,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               ),
               DropdownButtonFormField<String>(
                 value: _customerType,
-                decoration: InputDecoration(labelText: 'Customer Type'),
+                decoration: const InputDecoration(labelText: 'Customer Type'),
                 items: ['Individual', 'Family', 'Group']
                     .map((type) => DropdownMenuItem(
                           value: type,
@@ -101,7 +101,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               ),
               DropdownButtonFormField<String>(
                 value: _destination,
-                decoration: InputDecoration(labelText: 'Destination'),
+                decoration: const InputDecoration(labelText: 'Destination'),
                 items:
                     ['Niagara Falls', 'Blue Mountains', 'Banff National Park']
                         .map((dest) => DropdownMenuItem(
@@ -123,7 +123,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               ),
               TextFormField(
                 initialValue: _tripPrice.toString(),
-                decoration: InputDecoration(labelText: 'Trip Price'),
+                decoration: const InputDecoration(labelText: 'Trip Price'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
@@ -141,7 +141,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               if (_customerType == 'Individual')
                 TextFormField(
                   initialValue: _customerTypeDetail,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       labelText: 'Travel Insurance (Policy Number)'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -156,7 +156,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               else if (_customerType == 'Family')
                 TextFormField(
                   initialValue: _customerTypeDetail,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       labelText: 'Family Health Coverage (Insurance Company)'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -171,7 +171,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               else if (_customerType == 'Group')
                 TextFormField(
                   initialValue: _customerTypeDetail,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       labelText: 'Organizing Hardware (Whistles, Flags, etc.)'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -183,10 +183,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     _customerTypeDetail = value!;
                   },
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveTrip,
-                child: Text('Save'),
+                child: const Text('Save'),
               ),
             ],
           ),

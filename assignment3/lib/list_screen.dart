@@ -4,6 +4,8 @@ import 'details_screen.dart';
 import 'trips.dart';
 
 class TripListScreen extends StatefulWidget {
+  const TripListScreen({super.key});
+
   @override
   _TripListScreenState createState() => _TripListScreenState();
 }
@@ -35,24 +37,24 @@ class _TripListScreenState extends State<TripListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trips List'),
+        title: const Text('Trips List'),
       ),
       body: trips.isEmpty
-          ? Center(child: Text('No trips booked yet.'))
+          ? const Center(child: Text('No trips booked yet.'))
           : Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Total Trips: ${trips.length}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Total Trips Cost: \$${tripsTotal}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    'Total Trips Cost: \$$tripsTotal',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                 ),
                 Expanded(
@@ -67,7 +69,7 @@ class _TripListScreenState extends State<TripListScreen> {
                           'Destination: ${trip.destination}, Price: \$${trip.tripPrice.toStringAsFixed(2)}\nDetails: ${trip.customerTypeDetail}',
                         ),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: const Icon(Icons.delete),
                           onPressed: () => _deleteTrip(trip.id!),
                         ),
                         onTap: () {
@@ -89,11 +91,11 @@ class _TripListScreenState extends State<TripListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TripDetailScreen()),
+            MaterialPageRoute(builder: (context) => const TripDetailScreen()),
           ).then((_) => _loadTrips());
         },
-        child: Icon(Icons.add),
         tooltip: 'Add New Trip',
+        child: const Icon(Icons.add),
       ),
     );
   }
