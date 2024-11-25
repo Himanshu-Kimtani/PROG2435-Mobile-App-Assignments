@@ -10,6 +10,7 @@ class TripListScreen extends StatefulWidget {
 
 class _TripListScreenState extends State<TripListScreen> {
   List<Trip> trips = [];
+  double tripsTotal = 0;
 
   @override
   void initState() {
@@ -21,6 +22,7 @@ class _TripListScreenState extends State<TripListScreen> {
     final fetchedTrips = await DatabaseHelper.instance.fetchTrips();
     setState(() {
       trips = fetchedTrips;
+      tripsTotal = trips.fold(0.0, (sum, trip) => sum + trip.tripPrice);
     });
   }
 
@@ -40,10 +42,17 @@ class _TripListScreenState extends State<TripListScreen> {
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Total Trips: ${trips.length}',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Total Trips Cost: \$${tripsTotal}',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                 ),
                 Expanded(

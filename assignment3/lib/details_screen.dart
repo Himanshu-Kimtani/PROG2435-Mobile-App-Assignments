@@ -24,7 +24,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     super.initState();
     _customerName = widget.trip?.customerName ?? '';
     _customerType = widget.trip?.customerType ?? 'Individual'; // Default value
-    _destination = widget.trip?.destination ?? '';
+    _destination = widget.trip?.destination ?? 'Niagara Falls'; // Default Value
     _tripPrice = widget.trip?.tripPrice ?? 0.0;
     _customerTypeDetail = widget.trip?.customerTypeDetail ?? '';
   }
@@ -99,17 +99,26 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   return null;
                 },
               ),
-              TextFormField(
-                initialValue: _destination,
+              DropdownButtonFormField<String>(
+                value: _destination,
                 decoration: InputDecoration(labelText: 'Destination'),
+                items:
+                    ['Niagara Falls', 'Blue Mountains', 'Banff National Park']
+                        .map((dest) => DropdownMenuItem(
+                              value: dest,
+                              child: Text(dest),
+                            ))
+                        .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _destination = value!;
+                  });
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a destination';
+                    return 'Please select a Destination';
                   }
                   return null;
-                },
-                onSaved: (value) {
-                  _destination = value!;
                 },
               ),
               TextFormField(
@@ -119,6 +128,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
                     return 'Please enter a valid price';
+                  }
+                  if (double.tryParse(value)! <= 0.0) {
+                    return 'Trip price has to be more than \$${0.0}';
                   }
                   return null;
                 },
