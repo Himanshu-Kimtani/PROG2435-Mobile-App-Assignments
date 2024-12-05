@@ -1,19 +1,25 @@
 name: final_project_gp3
 description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+
+publish_to: none # This indicates the package is not published publicly
+version: 0.1.0+1 # Added a build number for better version control
 
 environment:
-  sdk: ^3.5.2
+  sdk: ">=3.5.2 <4.0.0" # Ensure compatibility with Dart SDK version
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.3 # Dependency for SVG rendering
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^4.0.0 # Provides Flutter best practices and linting rules
 
 flutter:
   uses-material-design: true
+
+  # Configure assets such as images and other resources
+  assets:
+    - assets/logo-transparent-svg.svg # Path to your SVG logo
