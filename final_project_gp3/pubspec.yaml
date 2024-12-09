@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.3 # Dependency for SVG rendering
+  google_maps_flutter: ^2.7.0 # Added Google Maps dependency
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +24,4 @@ flutter:
   # Configure assets such as images and other resources
   assets:
     - assets/logo-transparent-svg.svg # Path to your SVG logo
+
